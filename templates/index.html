@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Smart Document Organizer</title>
+	<style>
+		body {
+			font-family: sans-serif;
+			background: #111;
+			color: #eee;
+			text-align: center;
+		}
+		#drop-zone {
+			border: 2px dashed #888;
+			border-radius: 10px;
+			padding: 50px;
+			width: 80%;
+			margin: 50px auto;
+			cursor: pointer;
+		}
+		#drop-zone.dragover {
+			background-color: #222;
+			border-color: #0f0;
+		}
+	</style>
+</head>
+<body>
+	<h1>📁 Smart Document Organizer</h1>
+	<p>Drop a folder here or click to choose one.</p>
+	<form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+		<input id="folder-input" type="file" name="file" webkitdirectory directory multiple hidden>
+		<div id="drop-zone">Drop your folder here or click to browse.</div>
+		<input type="submit" value="Submit" hidden>
+	</form>
+
+	<script>
+		window.addEventListener("DOMContentLoaded", () => {
+			(async () => {
+				try {
+					const response = await fetch("/ask_ai", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							prompt: "Respond with an exclamatory greeting, with no interrogatives!",
+							model: "mistral:7b-instruct-q4_K_M"
+						})
+					});
+
+					const data = await response.json();
+
+					if (data.response) {
+						document.body.insertAdjacentHTML("beforeend", `<h2>${data.response}</h2>`);
+					}
+				} catch (err) {
+					console.log(err.message);
+					console.error(err);
+				}
+			})();
+		});
+
+		const dropZone = document.getElementById('drop-zone');
+		const folderInput = document.getElementById('folder-input');
+		const form = document.getElementById('upload-form');
+
+		dropZone.addEventListener('click', () => folderInput.click());
+
+		dropZone.addEventListener('dragover', e => {
+			e.preventDefault();
+			dropZone.classList.add('dragover');
+		});
+
+		dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+		dropZone.addEventListener('drop', e => {
+			e.preventDefault();
+			dropZone.classList.remove('dragover');
+
+			const dt = e.dataTransfer;
+			const files = dt.files;
+			uploadFiles(files);
+		});
+
+		folderInput.addEventListener('change', () => {
+			uploadFiles(folderInput.files);
+		});
+
+		function uploadFiles(files) {
+			const formData = new FormData();
+			for (let i = 0; i < files.length; i++) {
+				formData.append(files[i].webkitRelativePath || files[i].name, files[i]);
+			}
+
+			fetch('/upload', {
+				method: 'POST',
+				body: formData
+			}).then(res => res.text()).then(html => {
+				document.open();
+				document.write(html);
+				document.close();
+			});
+		}
+	</script>
+</body>
+</html>

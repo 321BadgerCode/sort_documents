@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Suggested Folder Structure</title>
+	<style>
+		body {
+			background-color: #121212;
+			color: #e0e0e0;
+			font-family: 'Segoe UI', sans-serif;
+			padding: 40px;
+		}
+		h1 {
+			text-align: center;
+			margin-bottom: 30px;
+		}
+		ul {
+			list-style: none;
+			padding-left: 20px;
+		}
+		li {
+			margin: 4px 0;
+			font-size: 16px;
+			line-height: 1.5em;
+		}
+		.folder::before {
+			content: "📁 ";
+		}
+		.file::before {
+			content: "📄 ";
+		}
+		button {
+			display: block;
+			margin: 30px auto;
+			padding: 10px 20px;
+			font-size: 16px;
+			background-color: #1e88e5;
+			color: white;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+		button:hover {
+			background-color: #1565c0;
+		}
+	</style>
+</head>
+<body>
+	<h1>📂 Suggested Folder Structure</h1>
+
+	<ul>
+		{% for folder, files in structure.items() %}
+			<!-- follow tree structure. can be any number of subfolders, etc -->
+			{% for subfolder, subfiles in files.items() %}
+				<li class="folder">{{ folder }}/{{ subfolder }}</li>
+				<ul>
+					{% for file in subfiles %}
+						<li class="file">{{ file }}</li>
+					{% endfor %}
+				</ul>
+			{% endfor %}
+		{% endfor %}
+	</ul>
+
+	<form action="/reorder" method="POST">
+		<button type="submit">✅ Reorder Files</button>
+	</form>
+</body>
+</html>
